@@ -1,9 +1,8 @@
-from python:3.9-slim-bullseye
+FROM python:3.9-slim-bullseye
 
-COPY /app/static /static
+COPY static /static
 
 LABEL version="1.0.1"
-
 LABEL permissions='{\
   "ExposedPorts": {\
   "80/tcp": {}\
@@ -18,6 +17,7 @@ LABEL permissions='{\
   }\
   }\
   }'
+
 LABEL company='{\
   "about": "",\
   "name": "MIT",\
@@ -30,4 +30,4 @@ LABEL links='{\
   "support": "https://github.com/jerWenger/blueos-mavlink-parser/tree/main"\
   }'
 LABEL requirements="core >= 1.1"
-ENTRYPOINT cd /static && python -m http.server 80
+ENTRYPOINT ["sh", "-c", "cd /static && python -m http.server 80"]
