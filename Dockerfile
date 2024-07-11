@@ -1,8 +1,9 @@
 from python:3.9-slim-bullseye
 
-COPY app /app
+COPY /app/static /static
 
 LABEL version="1.0.1"
+
 LABEL permissions='{\
   "ExposedPorts": {\
   "80/tcp": {}\
@@ -17,12 +18,6 @@ LABEL permissions='{\
   }\
   }\
   }'
-LABEL authors='[\
-  {\
-  "name": "Jeremy Wenger",\
-  "email": "jwenger@mit.edu"\
-  }\
-  ]'
 LABEL company='{\
   "about": "",\
   "name": "MIT",\
