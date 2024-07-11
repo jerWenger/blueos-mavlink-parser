@@ -6,21 +6,29 @@
 </head>
 
 <body>
-    <h1> Hello MAVLink World</h1>
-    <h3> Your current attitude is: Roll:<span id="roll">--.-</span> Pitch:<span id="pitch">--.-</span> Yaw:<span
-            id="yaw">--.-</span></h3>
-    <h3> Last updated: <span id="last">--.-</span> seconds ago</h3>
-    <h1>
-        <div id="gps-status">
-            <h1>GPS Status</h1>
-            <div><strong>Satellites visible:</strong> <span id="satellites-visible">--</span></div>
-            <div><strong>Satellite PRN:</strong> <span id="satellite-prn">--</span></div>
-            <div><strong>Satellite used:</strong> <span id="satellite-used">--</span></div>
-            <div><strong>Satellite elevation:</strong> <span id="satellite-elevation">--</span></div>
-            <div><strong>Satellite azimuth:</strong> <span id="satellite-azimuth">--</span></div>
-            <div><strong>Satellite SNR:</strong> <span id="satellite-snr">--</span></div>
-        </div>
+    <div id="system-status">
+        <h1>System Status</h1>
+        <div><strong>Battery Voltage:</strong> <span id="battery-voltage">--</span></div>
+        <div><strong>Load:</strong> <span id="load">--</span></div>
+    </div>
 
+    <div id="attitude-status">
+        <h1>Attitude Status</h1>
+        <div><strong>Roll:</strong> <span id="roll">--</span></div>
+        <div><strong>Pitch:</strong> <span id="pitch">--</span></div>
+        <div><strong>Yaw:</strong> <span id="yaw">--</span></div>
+    </div>
+
+    <div id="gps-status">
+        <h1>GPS Status</h1>
+        <div><strong>Heading:</strong> <span id="heading">--</span></div>
+        <div><strong>Latitude:</strong> <span id="latitude">--</span></div>
+        <div><strong>Longitude:</strong> <span id="longitude">--</span></div>
+        <div><strong>Relative Altitude:</strong> <span id="relative-altitude">--</span></div>
+        <div><strong>Velocity X:</strong> <span id="velocity-x">--</span></div>
+        <div><strong>Velocity Y:</strong> <span id="velocity-y">--</span></div>
+        <div><strong>Velocity Z:</strong> <span id="velocity-z">--</span></div>
+    </div>
 </body>
 
 <script>
@@ -28,29 +36,39 @@
     const mavlink2rest_url = `http://blueos.local/mavlink2rest`
 
     const attitude_url = mavlink2rest_url + '/mavlink/vehicles/1/components/1/messages/ATTITUDE'
-    const gps_url = mavlink2rest_url + '/mavlink/vehicles/1/components/1/messages/GPS_STATUS'
+    const gps_url = mavlink2rest_url + '/mavlink/vehicles/1/components/1/messages/GLOBAL_POSITION_INT'
+    const sys_url = mavlink2rest_url + '/mavlink/vehicles/1/components/1/messages/SYS_STATUS'
 
 
     setInterval(async () => {
         const response = await fetch(attitude_url);
         const data = await response.json();
         const payload = data["message"]
-        const last_updated = data["status"]["time"]["last_update"]
         document.getElementById("roll").innerText = (payload["roll"] / Math.PI * 180).toFixed(1)
         document.getElementById("pitch").innerText = (payload["pitch"] / Math.PI * 180).toFixed(1)
         document.getElementById("yaw").innerText = (payload["yaw"] / Math.PI * 180).toFixed(1)
-        document.getElementById("last").innerText = ((Date.now() - Date.parse(last_updated)) / 1000).toFixed(1)
 
         const fetched_gps = await fetch(gps_url);
         const results = await fetched_gps.json();
         const information = results["message"]
-        document.getElementById('satellites-visible').textContent = information.satellites_visible
-        document.getElementById('satellite-prn').textContent = information.satellite_prn.join(', ')
-        document.getElementById('satellite-used').textContent = information.satellite_used.join(', ')
-        document.getElementById('satellite-elevation').textContent = information.satellite_elevation.join(', ')
-        document.getElementById('satellite-azimuth').textContent = information.satellite_azimuth.join(', ')
-        document.getElementById('satellite-snr').textContent = information.satellite_snr.join(', ')
-    }, 1000)
+        document.getElementById('heading').textContent = information.hdg;
+        document.getElementById('latitude').textContent = information.lat / 1e7;
+        document.getElementById('longitude').textContent = information.lon / 1e7;
+        document.getElementById('relative-altitude').textContent = information.relative_alt;
+        document.getElementById('velocity-x').textContent = information.vx;
+        document.getElementById('velocity-y').textContent = information.vy;
+        document.getElementById('velocity-z').textContent = information.vz;
+
+        const sysResponse = await fetch(sys_url);
+        const sysData = await sysResponse.json();
+        const sysInformation = sysData.message; // Corrected variable name to match the message structure
+
+        const batteryVoltage = (sysInformation.voltage_battery / 1000).toFixed(3);
+        const load = (sysInformation.current_battery / -100).toFixed(2);
+
+        document.getElementById('battery-voltage').textContent = batteryVoltage + ' V';
+        document.getElementById('load').textContent = load + ' A';
+    }, 500);
 
 </script>
 
