@@ -1,6 +1,6 @@
 from python:3.9-slim-bullseye
 
-COPY static /static
+COPY app /app
 
 LABEL version="1.0.1"
 LABEL permissions='{\
